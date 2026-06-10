@@ -1,0 +1,20 @@
+[project]
+name = "comfyui-mutantwork"
+description = "Prompt optimization, local AI forensics, and image provenance for ComfyUI. Includes the Mutant Prompt Optimizer (Word Weight methodology), Mutant Forensic Lab (local FFT/ELA/metadata detection), and Mutant Signature (PNG provenance injection)."
+version = "1.0.0"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.24.0",
+    "Pillow>=10.0.0",
+    "scipy>=1.11.0",
+    "opencv-python>=4.8.0",
+]
+
+[project.urls]
+Repository = "https://github.com/brerereton-beep/ComfyUI-Mutantwork"
+Homepage   = "https://mutantwork.com"
+
+[tool.comfy]
+PublisherId = "REPLACE_WITH_YOUR_PUBLISHER_ID"
+DisplayName = "Mutantwork Power Pack"
+Icon        = "https://mutantwork.com/mutant-icon.png"
