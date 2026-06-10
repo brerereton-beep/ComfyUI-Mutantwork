@@ -15,6 +15,6 @@ Repository = "https://github.com/brerereton-beep/ComfyUI-Mutantwork"
 Homepage   = "https://mutantwork.com"
 
 [tool.comfy]
-PublisherId = "REPLACE_WITH_YOUR_PUBLISHER_ID"
+PublisherId = "mutantwork"
 DisplayName = "Mutantwork Power Pack"
 Icon        = "https://mutantwork.com/mutant-icon.png"
