@@ -1,6 +1,6 @@
 # 🧬 ComfyUI-Mutantwork — The Mutant Power Pack
 
-**A professional ComfyUI custom node suite for prompt optimization, local AI forensics, and image provenance.**
+**A professional ComfyUI custom node suite for prompt optimization, local AI forensics, image provenance, and C2PA content credentials.**
 
 Built by [Mutantwork](https://mutantwork.com) — AI tools built different.
 
@@ -28,8 +28,6 @@ Most "quality" tokens (`masterpiece`, `4k`, `highly detailed`) have been seen so
 
 **Outputs:** `optimized_prompt` (ready for CLIP Text Encode) + `optimization_report`
 
-The Word Weight Dictionary is an editable Python dict at the top of `nodes/prompt_optimizer.py` — add your own mappings in the same format.
-
 ---
 
 ### 🔬 Mutant Forensic Lab
@@ -42,9 +40,6 @@ Runs three forensic pillars locally:
 | **A — Metadata** | PNG/EXIF text chunk extraction | ComfyUI workflow JSON, A1111 parameters, Midjourney tags, camera EXIF |
 | **B — FFT Analysis** | 2D Fast Fourier Transform | Latent grid artifacts at 8/16/32px intervals from VAE decoder upsampling |
 | **C — ELA** | Error Level Analysis | Inconsistent compression cycles indicating composited or edited images |
-
-**Why FFT detects AI images:**
-Diffusion models operate in latent space where 1 latent pixel = 8 spatial pixels. The VAE decoder's upsampling introduces periodic energy at those intervals. In the Fourier domain, this appears as a cross-axis spike pattern — the "Digital Grid". Natural photographs don't show this.
 
 **Outputs:** `image` (pass-through) + `forensic_report` (scored text report with verdict)
 
@@ -59,27 +54,52 @@ Key:   Mutantwork
 Value: Optimized by Prompt Power | mutantwork.com
 ```
 
-Images signed by this node can be instantly verified at **[mutantwork.com/verify](https://mutantwork.com/verify)** — the site reads the metadata and confirms the Mutant Signature on upload.
+Images signed by this node can be instantly verified at **[mutantwork.com/verify](https://mutantwork.com/verify)**.
 
-Chain this node before your Save Image node. The image tensor passes through unchanged; a signed copy is written to your output directory.
+---
+
+### 🔏 Mutant Content Credentials
+**Embeds a cryptographically signed C2PA manifest into your image.**
+
+C2PA (Coalition for Content Provenance and Authenticity) is the open standard backed by Adobe, Microsoft, Google, the BBC, and major media organisations for verifiable media provenance.
+
+**What it does:**
+- Signs your image with a cryptographic manifest — tamper-evident and verifiable
+- Embeds a **"Do Not Train"** assertion (AI training mining: notAllowed)
+- Records creator name, AI model, and timestamp
+- Signed images are verified at **[mutantwork.com/verify](https://mutantwork.com/verify)** — drop in your image and the C2PA badge appears instantly
+
+**Ships with bundled test certs — zero setup required.** Optionally accepts your own PEM certificate for production signing.
+
+**Controls:**
+| Input | Description |
+|-------|-------------|
+| `creator_name` | Your name or brand (default: Mutantwork) |
+| `ai_model` | The model used to generate the image |
+| `do_not_train` | Embeds C2PA "notAllowed" training assertion when enabled |
+| `filename_prefix` | Output filename prefix |
+| `custom_cert_pem` | Optional: path to your own PEM certificate |
+| `custom_key_pem` | Optional: path to your own PEM private key |
+
+**Requires:** `pip install c2pa-python cryptography`
 
 ---
 
 ## Installation
 
 ### Option 1 — Manual
-1. Clone or download this repo into your `ComfyUI/custom_nodes/` folder:
+1. Clone into your `ComfyUI/custom_nodes/` folder:
 ```bash
 cd ComfyUI/custom_nodes
-git clone https://github.com/brerereton/ComfyUI-Mutantwork.git
+git clone https://github.com/brerereton-beep/ComfyUI-Mutantwork.git
 ```
 
-2. Install dependencies (numpy and Pillow are usually already present):
+2. Install dependencies:
 ```bash
 pip install -r ComfyUI-Mutantwork/requirements.txt
 ```
 
-3. Restart ComfyUI. The nodes appear under the **"Mutantwork"** category.
+3. Restart ComfyUI. Nodes appear under the **"Mutantwork"** category.
 
 ### Option 2 — ComfyUI Manager
 Search for `ComfyUI-Mutantwork` in ComfyUI Manager → Install.
@@ -89,15 +109,12 @@ Search for `ComfyUI-Mutantwork` in ComfyUI Manager → Install.
 ## Example Workflow
 
 ```
-[Load Image] ──→ [Mutant Forensic Lab] ──→ [Mutant Signature] ──→ [Save Image]
-                         ↓                          ↓
-                  [Display Any]              [Display Any]
-               (forensic_report)           (signature_log)
+[Load Image] ──→ [Mutant Forensic Lab] ──→ [Mutant Signature] ──→ [Mutant Content Credentials] ──→ [Save Image]
+                         ↓                          ↓                           ↓
+                  [Display Any]              [Display Any]              [Display Any]
+               (forensic_report)           (signature_log)           (credentials_log)
 
 [Mutant Prompt Optimizer] ──→ [CLIP Text Encode] ──→ [KSampler...]
-         ↓
-  [Display Any]
-(optimized_prompt)
 ```
 
 ---
@@ -109,29 +126,8 @@ numpy>=1.24.0
 Pillow>=10.0.0
 scipy>=1.11.0
 opencv-python>=4.8.0
+c2pa-python>=0.32.0
 ```
-
-NumPy and Pillow are bundled with most ComfyUI installations.
-
----
-
-## Verify Signatures
-
-Images processed through the **Mutant Signature** node carry a hidden PNG metadata key.
-Upload them to **[mutantwork.com/verify](https://mutantwork.com/verify)** — the site confirms the signature and runs full AI forensic analysis.
-
----
-
-## Expanding the Word Weight Dictionary
-
-Open `nodes/prompt_optimizer.py`. The `WORD_WEIGHT_DICT` is at the top of the file.
-
-Add entries in this format:
-```python
-"your weak phrase": "(your strong weighted phrase:1.3)",
-```
-
-Weight scale: `1.0` = neutral, `1.1–1.3` = moderate boost, `1.4–1.5` = strong.
 
 ---
 
